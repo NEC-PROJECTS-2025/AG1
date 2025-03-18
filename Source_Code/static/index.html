@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lung Disease Detection</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-emphasis-color: white;
+        }
+        .navbar {
+            margin-bottom: 20px;
+            background-color: mediumaquamarine;
+        }
+        .navbar-brand img {
+            height: 50px; /* Increased size for better visibility */
+            margin-right: 15px;
+        }
+        .nav-item {
+            margin-left: 20px; /* Increased spacing */
+        }
+        .content {
+            margin: 20px;
+        }
+        .footer {
+            margin-top: 250px;
+            text-align: center;
+            padding: 10px;
+            background: aqua;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: url('https://img.freepik.com/free-photo/stethoscope-with-lung-shape-desk_23-2148533070.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: whitesmoke;
+        }
+        header, main {
+            text-align: center;
+            padding: 50px;
+            background-color: white; /* semi-transparent background */
+        }
+        h1, h3 {
+            font-size: 36px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        p {
+            font-size: 18px;
+            line-height: 1.6;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">
+                <img src="https://i0.wp.com/www.nrtec.in/wp-content/uploads/2018/05/logo-nec1.png?w=1170&ssl=1" alt="Logo">
+               
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/home">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/predict">Predict</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/about">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/evaluationmetrics">Evaluation Metrics</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/flowchart">Flowchart</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/frontend">Frontend</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        
+        }
+        .metrics-container {
+            margin-top: 20px;
+        }
+        .metric-box {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .chart-container {
+            margin-top: 30px;
+        }
+        /* h5{
+            text-align: center;
+            color: black;
+        } */
+        /* Center the prediction result */
+#output {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 50vh;
+    text-align: center;
+    font-size: 20px;
+    color: black; /* Change to black for better visibility */
+}
+
+/* Make class name larger */
+#output h5 {
+    font-size: 36px;
+    margin-bottom: 20px;
+}
+
+#output pre {
+    font-size: 24px;
+    background-color: rgba(255, 255, 255, 0.8); /* Slightly transparent background */
+    padding: 20px;
+    border-radius: 10px;
+    text-align: left;
+    font-size: 28px; /* Larger font for output */
+}
+.image-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .image-container img {
+            max-width: 100%;
+            height: auto;
+        }
+        .image-container p {
+            font-size: 18px;
+            margin-top: 10px;
+            color: #555;
+        }
+    </style>
+
+
+    
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <div class="container">
+        <div id="mainContent" class="content">
+            <!-- Main content will be dynamically injected here -->
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>&copy; 2024 Lung Disease Detection Project. All rights reserved.</p>
+    </div>
+    <script>
+        // Fetch the evaluation metrics from the backend
+        fetch('/evaluationmetrics')
+            .then(response => response.json())
+            .then(data => {
+                // Display metrics
+                document.getElementById('accuracy-value').textContent = data.accuracy.toFixed(2);
+                document.getElementById('precision-value').textContent = data.precision.toFixed(2);
+                document.getElementById('recall-value').textContent = data.recall.toFixed(2);
+                document.getElementById('f1-score-value').textContent = data.f1_score.toFixed(2);
+                document.getElementById('log-loss-value').textContent = data.log_loss.toFixed(2);
+
+                // Prepare confusion matrix data for Chart.js
+                const cm = data.confusion_matrix;
+                const ctx = document.getElementById('confusionMatrixChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['True Negative', 'False Positive', 'False Negative', 'True Positive'],
+                        datasets: [{
+                            label: 'Confusion Matrix',
+                            data: cm.flat(),
+                            backgroundColor: ['#ff6666', '#ffcc66', '#66ccff', '#66ff66'],
+                            borderColor: ['#ff3333', '#ff9933', '#3399cc', '#33cc33'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching metrics:', error);
+            });
+    </script>
+                  
+    <script>
+        
+const routes = {
+    '/': `<h1>Welcome to Lung Disease Detection</h1>
+                  <p>Upload a medical image and let our AI predict the lung disease. Navigate through the tabs for more information.</p>`,
+            '/frontend': `<h1>Unveiling the Potential of Deep Learning:</h1>
+                          <p>A Multifaceted Approach to Pulmonary Disease Detection and Clinical Integration</p>
+                          <h3>Team Members:</h3>
+                          <p>1. Member 1: Siva Anjali Gurram</p>
+                          <p>2. Member 2: Jyoshna Devi Pandi</p>
+                          <p>3. Member 3: Lavanya Gude</p>
+                          <h3>Under the gudiance of </h3>
+                          <p>Dr. K. LakshmiNadh</p>`,
+    '/home': `
+    <h1>About the Project</h1>
+    <p>This project leverages deep learning techniques to predict various pulmonary diseases from chest X-ray images. 
+       It aims to assist medical professionals in making quick, accurate, and reliable diagnoses, thus improving the efficiency and effectiveness of healthcare systems.</p>
+
+    <h2>Project Motivation</h2>
+    <p>With the growing prevalence of lung diseases globally, early detection through imaging is crucial for effective treatment. Pulmonary diseases, such as pneumonia, tuberculosis, and lung cancer, often require time-consuming and error-prone manual analysis of X-ray images. This project seeks to minimize those challenges by introducing an AI-driven solution capable of real-time predictions.</p>
+
+    <h2>Key Features:</h2>
+    <ul>
+        <li><strong>Real-time Disease Prediction:</strong> The AI model can accurately identify lung diseases from chest X-ray images within seconds, providing immediate feedback to healthcare professionals.</li>
+        <li><strong>Interactive and User-friendly Interface:</strong> The web-based interface is designed to be simple and easy to use, requiring minimal technical knowledge. Users can easily upload X-ray images and view the results with just a few clicks.</li>
+        <li><strong>Scalable and Robust Back-End Architecture:</strong> Built on a scalable architecture, this system can handle large volumes of data and can be extended to accommodate other medical imaging tasks.</li>
+        <li><strong>Continuous Learning:</strong> The AI model is designed to continuously improve as more data becomes available, ensuring that the predictions stay up-to-date with the latest advancements in medical research.</li>
+        <li><strong>Multi-Disease Detection:</strong> The system is capable of identifying multiple lung diseases in a single X-ray image, making it versatile for different clinical scenarios.</li>
+    </ul>
+
+    <h2>Technology Stack:</h2>
+    <p>The project uses a combination of cutting-edge technologies to achieve its goal:</p>
+    <ul>
+        <li><strong>Deep Learning Frameworks:</strong> TensorFlow and Keras are used for building and training the convolutional neural network (CNN) that powers the disease detection system.</li>
+        <li><strong>Backend:</strong> The backend is built using Python and Flask, providing a lightweight and efficient server for handling image uploads and serving predictions.</li>
+        <li><strong>Frontend:</strong> The frontend is designed using HTML, CSS, and Bootstrap to ensure a responsive and user-friendly experience on both desktop and mobile devices.</li>
+        <li><strong>Cloud Hosting:</strong> The project is hosted on a cloud platform, ensuring scalability and high availability, and enabling the integration of new features in the future.</li>
+    </ul>
+
+    <h2>Potential Impact:</h2>
+    <p>This project has the potential to revolutionize the way lung diseases are detected. By automating the diagnosis process, it can reduce the workload of radiologists and provide faster results, improving patient outcomes. Additionally, the system can be deployed in remote areas where access to medical professionals is limited, offering healthcare access to underserved populations.</p>
+
+    <h2>Future Enhancements:</h2>
+    <p>In the future, we plan to expand the capabilities of this system by:</p>
+    <ul>
+        <li>Integrating additional diagnostic tests and medical imaging techniques for broader disease detection.</li>
+        <li>Implementing multi-language support to make the platform accessible to a global audience.</li>
+        <li>Improving the model's accuracy by using larger datasets and more advanced deep learning techniques.</li>
+        <li>Developing a mobile app to enable healthcare providers to make predictions on-the-go.</li>
+    </ul>
+
+    <h2>Team Members:</h2>
+    <p>1. Member 1: Siva Anjali Gurram</p>
+    <p>2. Member 2: Jyoshna Devi Pandi</p>
+    <p>3. Member 3: Lavanya Gude</p>
+
+    <h3>Under the Guidance of:</h3>
+    <p>Dr. K. LakshmiNadh</p>
+`
+,
+    '/predict': `<h1>Upload and Predict</h1>
+                 <form id="uploadForm" enctype="multipart/form-data">
+                     <div class="mb-3">
+                         <label for="fileInput" class="form-label">Upload an X-ray Image</label>
+                         <input class="form-control" type="file" id="fileInput" name="file">
+                     </div>
+                     <button type="button" class="btn btn-primary" onclick="submitFile()">Predict</button>
+                 </form>
+                 <div id="output" class="mt-4"></div>`,
+    '/about': `
+    <h1 style="text-align: center; font-size: 40px; font-weight: bold; color: #333; text-transform: uppercase; letter-spacing: 2px;">About Us</h1>
+    
+    <div style="max-width: 800px; margin: 0 auto; text-align: center; background-color: rgba(255, 255, 255, 0.9); padding: 30px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);">
+        <p style="font-size: 18px; line-height: 1.6; color: #555;">
+            This project is a groundbreaking collaborative effort to integrate Artificial Intelligence into healthcare, specifically focusing on the early detection of pulmonary diseases. Our goal is to bridge the gap between advanced AI models and real-world healthcare needs, providing doctors with a powerful tool to make timely, accurate diagnoses.
+        </p>
+        
+        <h2 style="font-size: 30px; color: mediumseagreen; margin-top: 40px;">Our Mission</h2>
+        <p style="font-size: 18px; line-height: 1.6; color: #555;">
+            Our mission is to revolutionize healthcare by creating an accessible, AI-driven platform that aids medical professionals in diagnosing lung diseases from X-ray images. The application leverages state-of-the-art deep learning models to analyze chest X-rays, predicting diseases such as pneumonia, tuberculosis, and lung cancer with high accuracy.
+        </p>
+
+        <h2 style="font-size: 30px; color: mediumseagreen; margin-top: 40px;">Meet the Team</h2>
+        <div style="display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; margin-top: 20px;">
+            <div style="text-align: center; max-width: 250px; margin-bottom: 30px;">
+                <h3 style="font-size: 22px; color: #333;">Siva Anjali Gurram</h3>
+                <p style="font-size: 16px; color: #555;">Data Scientist & AI Specialist</p>
+            </div>
+            <div style="text-align: center; max-width: 250px; margin-bottom: 30px;">
+                <h3 style="font-size: 22px; color: #333;">Jyoshna Devi Pandi</h3>
+                <p style="font-size: 16px; color: #555;">Software Engineer & Full-stack Developer</p>
+            </div>
+            <div style="text-align: center; max-width: 250px; margin-bottom: 30px;">
+                <h3 style="font-size: 22px; color: #333;">Lavanya Gude</h3>
+                <p style="font-size: 16px; color: #555;">Healthcare Expert & Medical Consultant</p>
+            </div>
+        </div>
+
+        <h2 style="font-size: 30px; color: mediumseagreen; margin-top: 40px;">Guidance</h2>
+        <p style="font-size: 18px; line-height: 1.6; color: #555;">
+            Under the expert guidance of <strong style="font-size: 22px; color: #333;">Dr. K. LakshmiNadh</strong>, a renowned expert in healthcare integration and AI, our team has been able to leverage cutting-edge technology and apply it to real-world medical problems.
+        </p>
+        
+        <h2 style="font-size: 30px; color: mediumseagreen; margin-top: 40px;">Our Vision</h2>
+        <p style="font-size: 18px; line-height: 1.6; color: #555;">
+            We envision a future where AI becomes an indispensable tool in the medical field, especially in diagnosing life-threatening conditions such as lung diseases. Our platform aims to make healthcare more efficient, accessible, and accurate, reducing human error and increasing the speed of diagnosis.
+        </p>
+    </div>
+`
+,
+   '/flowchart': `
+    <h1 style="text-align: center; font-size: 40px; font-weight: bold; color: #333;">Project Flowchart</h1>
+    
+    <div class="image-container">
+        <img src="https://media.springernature.com/lw1200/springer-static/image/art%3A10.1007%2Fs42979-024-02617-7/MediaObjects/42979_2024_2617_Fig3_HTML.png" alt="Project Flowchart">
+        <p>The flowchart shows the step-by-step process of how our system works, from data collection to disease prediction.</p>
+    </div>
+`
+,
+    '/evaluationmetrics': `<h1>Model Evaluation Metrics</h1>
+    <div class="container">
+        <div id="metrics" class="metrics-container">
+            <h1>Model Evaluation Metrics</h1>
+            <div class="metric-box" id="accuracy">
+                <h4>Accuracy: <span id="accuracy-value"></span></h4>
+            </div>
+            <div class="metric-box" id="precision">
+                <h4>Precision: <span id="precision-value"></span></h4>
+            </div>
+            <div class="metric-box" id="recall">
+                <h4>Recall: <span id="recall-value"></span></h4>
+            </div>
+            <div class="metric-box" id="f1-score">
+                <h4>F1-Score: <span id="f1-score-value"></span></h4>
+            </div>
+            <div class="metric-box" id="log-loss">
+                <h4>Log Loss: <span id="log-loss-value"></span></h4>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <h3>Confusion Matrix</h3>
+            <canvas id="confusionMatrixChart"></canvas>
+        </div>
+    </div>`
+};
+//                <img src="https://via.placeholder.com/150" alt="Lavanya Gude" style="border-radius: 50%; width: 150px; height: 150px; object-fit: cover;">
+
+// Function to load content based on the route
+// Function to load content based on the route
+function loadContent(route) {
+    const mainContent = document.getElementById('mainContent');
+    mainContent.innerHTML = routes[route] || `<h1>404 - Page Not Found</h1>`;
+
+    // Fetch and display metrics only if the route is `/evaluationmetrics`
+    if (route === '/evaluationmetrics') {
+        // Only fetch metrics for the evaluation metrics page
+        fetch('/evaluationmetrics')
+            .then(response => response.json())
+            .then(data => {
+                
+
+                // Prepare confusion matrix data for Chart.js
+                const cm = data.confusion_matrix;
+                const ctx = document.getElementById('confusionMatrixChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['True Negative', 'False Positive', 'False Negative', 'True Positive'],
+                        datasets: [{
+                            label: 'Confusion Matrix',
+                            data: cm.flat(),
+                            backgroundColor: ['#ff6666', '#ffcc66', '#66ccff', '#66ff66'],
+                            borderColor: ['#ff3333', '#ff9933', '#3399cc', '#33cc33'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching metrics:', error);
+            });
+            // Display metrics
+            document.getElementById('accuracy-value').textContent = data.accuracy.toFixed(2);
+                document.getElementById('precision-value').textContent = data.precision.toFixed(2);
+                document.getElementById('recall-value').textContent = data.recall.toFixed(2);
+                document.getElementById('f1-score-value').textContent = data.f1_score.toFixed(2);
+                document.getElementById('log-loss-value').textContent = data.log_loss.toFixed(2);
+    }
+}
+
+
+// Handle navigation
+document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const route = this.getAttribute('href');
+        history.pushState({}, '', route);
+        loadContent(route);
+    });
+});
+
+// Handle browser back/forward navigation
+window.addEventListener('popstate', () => {
+    loadContent(location.pathname);
+});
+
+// Load initial content
+loadContent(location.pathname);
+
+// Predict function for the form
+// function submitFile() {
+//     const formData = new FormData();
+//     const fileInput = document.getElementById('fileInput');
+//     formData.append('file', fileInput.files[0]);
+
+//     fetch('/predict', {
+//         method: 'POST',
+//         body: formData
+//     })
+//     .then(response => response.json())
+//     .then(data => {
+//         const output = document.getElementById('output');
+//         output.innerHTML = `<h5>Prediction Results:</h5>
+//                             <pre>${JSON.stringify(data, null, 2)}</pre>`;
+//     })
+//     .catch(error => {
+//         console.error('Error:', error);
+//     });
+// }
+function submitFile() {
+    const formData = new FormData();
+    const fileInput = document.getElementById('fileInput');
+    formData.append('file', fileInput.files[0]);
+
+    fetch('/predict', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        const output = document.getElementById('output');
+        output.innerHTML = `
+            <h5>Prediction Results:</h5>
+            <pre>Class: <span style="font-size: 40px; font-weight: bold; color: #2e8b57;">${data.class}</span></pre>
+            <pre>Probability: ${data.probability.toFixed(2)}</pre>
+        `;
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
